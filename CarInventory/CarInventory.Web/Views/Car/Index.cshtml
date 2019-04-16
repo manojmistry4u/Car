@@ -1,0 +1,158 @@
+﻿
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+
+<section class="content">
+    <div class="row">
+
+        <div id="AddCarModal" class="modal fade" role="dialog">
+            <div class="modal-dialog">
+
+                <!-- Modal content-->
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close btnCloseCar">&times;</button>
+                        <h4 class="modal-title"></h4>
+                    </div>
+                    <form class="form-horizontal" id="CarForm">
+                        <div class="modal-body">
+                            <div class="row">
+
+                                <div class="box-body">
+                                    <div class="form-group">
+                                        <label for="inputEmail3" class="col-sm-2 control-label">Brand</label>
+                                        <div class="col-sm-9">
+                                            <input type="hidden" name="CarId" id="CarId" value="0" />
+                                            <input type="text" class="form-control" name="Brand" id="Brand" placeholder="Example: Honda" required>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="inputEmail3" class="col-sm-2 control-label">Model</label>
+                                        <div class="col-sm-9">
+                                            <input type="text" class="form-control" name="Model" id="Model" placeholder="Example: Honda City ZXI" required>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="inputEmail3" class="col-sm-2 control-label">Year</label>
+                                        <div class="col-sm-9">
+                                            <input type="text" class="form-control" name="Year" id="Year" placeholder="Example: 2015" required>
+                                        </div>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="inputEmail3" class="col-sm-2 control-label">Price ($)</label>
+                                        <div class="col-sm-9">
+                                            <input type="number" class="form-control" name="Price" id="Price" placeholder="Example: 10000" required>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label for="inputEmail3" class="col-sm-2 control-label">New</label>
+                                        <div class="col-sm-9">
+                                            <input type="checkbox" id="New" value="true" name="New" style="margin-top:10px;" />
+                                        </div>
+                                    </div>
+
+
+                                </div>
+
+
+
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" id="btnSaveCar" class="btn btn-info">Save</button>
+                            <button type="button" id="btnCloseCar" class="btn btn-default btnCloseCar">Close</button>
+                        </div>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="col-md-12">
+
+            <div id="CarList"></div>
+            <!-- /.box -->
+        </div>
+    </div>
+    <!-- /.row -->
+</section>
+@section Scripts {
+
+<script type="text/javascript">
+        $(document).ready(function () {
+            BindCarList();
+
+        });
+
+        function BindCarList() {
+
+            $.ajax({
+                url: "@Url.Action("CarList")",
+                type: 'GET',
+                cache: false,
+            }).done(function (result) {
+
+                $('#CarList').html(result);
+            });
+        }
+
+        $("#btnSaveCar").click(function () {
+
+            if (!$('#CarForm').parsley().validate()) {
+                return;
+            }
+
+            var model = new Object();
+            model.Id = $("#CarId").val();
+            model.Brand = $("#Brand").val();
+            model.Model = $("#Model").val();
+            model.Year = $("#Year").val();
+            model.Price = $("#Price").val();
+            model.New = $("#New").is(":checked");
+
+
+             $.ajax({
+                url: "@Url.Action("CarAddUpdate", "Car")",
+                type: "POST",
+                dataType: 'JSON',
+                data: { model : model },
+                success: function (result) {
+                    if ($("#CarId").val() === "0" && result) {
+                        swal("Good job!", "Car added.!", "success");
+                        document.getElementById("CarForm").reset();
+                        $("#CarId").val("0");
+                        $('#AddCarModal').modal('hide');
+                        BindCarList();
+                    } else if ($("#CarId").val() != "0" && result) {
+                        swal("Good job!", "Car updated.!", "success");
+                        document.getElementById("CarForm").reset();
+                        $("#CarId").val("0");
+                         $('#AddCarModal').modal('hide');
+                        BindCarList();
+                    } else {
+                        swal("Oops!", "Something wrong please try again!", "error");
+                    }
+
+                   
+
+                },
+                error: function (response) {
+                    swal("Oops!", "Something wrong please try again!", "error");
+                }
+            });
+            
+        });
+
+        $(".btnCloseCar").click(function () {
+            $("#CarId").val("0");
+            document.getElementById("CarForm").reset();
+            $('#AddCarModal').modal('hide');
+        });
+</script>
+}
+
+

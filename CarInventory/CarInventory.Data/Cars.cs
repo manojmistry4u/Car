@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace CarInventory.Data
 {
-    public class Cars: Entity
+    public class Cars: EntityWithAudit
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]

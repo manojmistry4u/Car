@@ -1,0 +1,129 @@
+﻿@model List<CarInventory.Data.Cars>
+
+@{
+    Layout = null;
+}
+<div class="box box-info">
+    <div class="box-header">
+        <h3 class="box-title">Car List
+        <input type="button" class="btn btn-primary btnAddNewCar" value="+ Add Car"/>
+        </h3>
+
+    </div>
+    <!-- /.box-header -->
+    <div class="box-body">
+        <table id="example2" class="table table-bordered table-striped">
+            <thead>
+                <tr>
+                    <th>Brand</th>
+                    <th>Model</th>
+                    <th>Year</th>
+                    <th>Price</th>
+                    <th>New</th>
+                    <th>Edit</th>
+                    <th>Delete</th>
+
+                </tr>
+            </thead>
+            <tbody>
+               @if (Model.Count > 0)
+               {
+                   foreach (var item in Model)
+                   {
+                <tr>
+                    <td>@item.Brand</td>
+                    <td>@item.Model</td>
+                    <td>@item.Year</td>
+                    <td>@item.Price</td>
+                    <td>@(item.New == true ? "Yes" : "No") </td>
+                    <td class="text-center"><a class="editcar" onclick="editcar(this,@item.Id,'@item.Brand','@item.Model','@item.Year','@item.Price','@item.New')"><i class="fa fa-edit"></i></a></td>
+                    <td class="text-center"><a class="deletecar" onclick="deletecar(this,@item.Id,'@item.Brand','@item.Model')"><i class="fa fa-trash"></i></a></td>
+
+                </tr>
+                   }
+               }
+
+            </tbody>
+
+        </table>
+    </div>
+    <!-- /.box-body -->
+</div>
+
+<script>
+    $(document).ready(function () {
+        $('#example2').DataTable({
+            'paging': true,
+            'lengthChange': false,
+            'searching': true,
+            'ordering': true,
+            'info': true,
+            'autoWidth': false
+        });
+    });
+
+    $('.btnAddNewCar').click(function () {
+        $('#AddCarModal').modal('show');
+        $('.modal-title').text('Add Car');
+     });
+
+    function editcar(obj,id,brand,model,year,price,newcar)
+    {
+       
+        $("#CarId").val(id);
+        $("#Brand").val(brand);
+        $("#Model").val(model);
+        $("#Year").val(year);
+        $("#Price").val(price);
+        var check = newcar;
+        if (check === 'True') {
+            $("#New").prop("checked", true);
+        } else {
+            $("#New").prop("checked", false);
+        }
+       
+        $('#AddCarModal').modal('show');
+        $('.modal-title').text('Edit Car');
+    }
+
+    function deletecar(obj, id, brand, model) {
+
+        swal({
+            title: "Are you sure?",
+            text: "You will not be able to recover this" + brand + " " + model,
+            type: "warning",
+            showCancelButton: true,
+            confirmButtonClass: "btn-danger",
+            confirmButtonText: "Yes, delete it!",
+            cancelButtonText: "No, cancel!",
+            closeOnConfirm: false,
+            closeOnCancel: false
+        },
+            function (isConfirm) {
+                if (isConfirm) {
+                    $.ajax({
+                        url: '/Car/DeleteCar',
+                        type: "GET",
+                        dataType: "JSON",
+                        data: { CarId: id },
+                        success: function (result) {
+
+                            if (result === true) {
+                                swal("Deleted!", "Your car has been deleted.", "success");
+                                BindCarList();
+                            } else {
+                                swal("Oops", "Something went wrong please try again!", "error");
+                            }
+                          
+                        },
+                        error: function (response) {
+                        }
+                    });
+                    
+                } else {
+                    swal("Cancelled", "Your car is safe :)", "error");
+                }
+            });
+    }
+
+</script>
